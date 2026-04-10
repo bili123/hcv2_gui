@@ -1,0 +1,246 @@
+/*
+GUI for check_httpv2
+Copyright (C) 2026 Mirco lang
+See COPYING file for more
+*/
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #fafafa;
+  color: #222;
+  margin: 2em;
+}
+
+h1 {
+  color: #0366d6;
+}
+
+form {
+  margin-bottom: 1.5em;
+  padding: 1em;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input, select, button {
+  margin: 0.2em 0;
+  padding: 0.3em 0.5em;
+}
+
+button {
+  cursor: pointer;
+  background: #0366d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+button:hover {
+  background: #0255b5;
+}
+
+.result {
+  padding: 1em;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status {
+  font-weight: bold;
+  padding: 0.5em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.status.ok {
+  background: #28a745;
+  color: white;
+}
+
+.status.warning {
+  background: #ffb300;
+  color: black;
+}
+
+.status.critical {
+  background: #dc3545;
+  color: white;
+}
+
+.output {
+  margin-top: 1em;
+  background: #f5f5f5;
+  padding: 0.8em;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+.summary {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  font-size: 0.95em;
+}
+
+.summary th, .summary td {
+  border: 1px solid #ddd;
+  padding: 0.5em 0.6em;
+  text-align: left;
+}
+
+.summary th {
+  background: #f0f0f0;
+}
+
+.badge {
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+}
+
+.badge.ok { background: #28a745; }
+.badge.warning { background: #ffb300; color: black; }
+.badge.critical { background: #dc3545; }
+.badge.unknown { background: #6c757d; }
+/* Dimmed or inactive rows */
+.summary tr.dimmed {
+  color: #888;
+  background: #f9f9f9;
+}
+
+/* Prevent badges on dimmed rows from showing as active */
+.summary tr.dimmed .badge {
+  background: #ccc;
+  color: #666;
+}
+.status {
+  font-weight: 700;
+  padding: .4rem .6rem;
+  border-radius: .4rem;
+  display: inline-block;
+  background: #6c757d;
+  color: #fff;
+}
+.status.ok { background: #28a745; }
+.status.warning { background: #ffb300; color: #000; }
+.status.critical { background: #dc3545; }
+
+.output {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: .8rem;
+  border-radius: .25rem;
+  max-height: 420px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.summary tr.dimmed { color: #888; }
+.summary tr.dimmed .badge { background: #ccc; color: #666; }
+.badge.ok { background: #28a745; }
+.badge.warning { background: #ffb300; color: #000; }
+.badge.critical { background: #dc3545; }
+.badge.unknown { background: #6c757d; }
+/* Wider profile manager */
+#profileModal .modal-dialog {
+  max-width: 95vw;   /* use 95% of viewport width */
+}
+
+/* Profile Manager responsive layout */
+#profileModal .modal-dialog {
+  max-width: 95vw;
+}
+
+/* Stack table + preview on narrow screens */
+@media (max-width: 768px) {
+  #profileModal .modal-body .row {
+    flex-direction: column !important;
+  }
+  #profileModal .modal-body .border-end {
+    border-right: none !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    margin-bottom: 1rem;
+  }
+  #profileModal .modal-body .ps-3 {
+    padding-left: 0 !important;
+  }
+}
+
+input[name="interval"] {
+  width: 6em;
+  text-align: right;
+}
+
+.output {
+  max-height: 360px;
+  overflow: auto;
+  background: #111;
+  color: #eee;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.status {
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #e9ecef;
+  display: inline-block;
+  min-width: 110px;
+  text-align: center;
+}
+
+.status.ok { background: #d1e7dd; }
+.status.warning { background: #fff3cd; }
+.status.critical { background: #f8d7da; }
+
+.badge.ok { background: #198754; }
+.badge.warning { background: #ffc107; color: #000; }
+.badge.critical { background: #dc3545; }
+.badge.unknown { background: #6c757d; }
+
+.dimmed { opacity: 0.65; }
+
+.status {
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-ok {
+  background: #2ecc71;
+  color: white;
+}
+
+.status-warn {
+  background: #f1c40f;
+  color: black;
+}
+
+.status-crit {
+  background: #e74c3c;
+  color: white;
+}
+
+.status-unknown {
+  background: #7f8c8d;
+  color: white;
+}
+
+/* Help tab */
+.help-code {
+  background: #0b1220;
+  color: #e6edf3;
+  padding: 12px;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.help-code code {
+  color: inherit;
+}

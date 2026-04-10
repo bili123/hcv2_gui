@@ -1,0 +1,601 @@
+<!--
+GUI for check_httpv2
+Copyright (C) 2026 Mirco lang
+See COPYING file for more
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>check_httpv2 GUI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+  <h1 class="mb-3">GUI for check_httpv2</h1>
+
+  <!-- Advanced toggle -->
+  <div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" id="toggleAdvanced">
+    <label class="form-check-label" for="toggleAdvanced">Show advanced options</label>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs" id="cfgTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic</button>
+    </li>
+
+    <!-- NEW: Content tab (hidden by default; shown for POST/PUT/PATCH) -->
+    <li class="nav-item d-none" role="presentation" id="content-tab-li">
+      <button class="nav-link" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button" role="tab">Content</button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="auth-tab" data-bs-toggle="tab" data-bs-target="#auth" type="button" role="tab">Auth</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="headers-tab" data-bs-toggle="tab" data-bs-target="#headers" type="button" role="tab">Headers</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="proxy-tab" data-bs-toggle="tab" data-bs-target="#proxy" type="button" role="tab">Proxy</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tls-tab" data-bs-toggle="tab" data-bs-target="#tls" type="button" role="tab">TLS/Certs</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="checks-tab" data-bs-toggle="tab" data-bs-target="#checks" type="button" role="tab">Checks</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="matching-tab" data-bs-toggle="tab" data-bs-target="#matching" type="button" role="tab">Matching</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab">Advanced</button>
+    </li>
+
+    <!-- NEW: Help tab -->
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="help-tab" data-bs-toggle="tab" data-bs-target="#help" type="button" role="tab">Help</button>
+    </li>
+  </ul>
+
+  <form id="checkForm" class="tab-content border border-top-0 bg-white p-3 rounded-bottom">
+
+    <!-- BASIC -->
+    <div class="tab-pane fade show active" id="basic" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">URL</label>
+          <input type="url" class="form-control" name="url" placeholder="https://example.com" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Method</label>
+          <select class="form-select" name="method" id="methodSelect">
+            <option value="">(auto: GET unless body)</option>
+            <option>GET</option>
+            <option>POST</option>
+            <option>HEAD</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+            <option>PATCH</option>
+            <option>OPTIONS</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Timeout (s)</label>
+          <input type="number" min="1" class="form-control" name="timeout" value="10">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">User-Agent</label>
+          <input type="text" class="form-control" name="user_agent" value="check_httpv2_agent">
+        </div>
+        <div class="col-md-6 adv d-none">
+          <label class="form-label">HTTP Version</label>
+          <select class="form-select" name="http_version">
+            <option value="">Auto (1.1 → upgrade to 2)</option>
+            <option value="http11">HTTP/1.1</option>
+            <option value="http2">HTTP/2</option>
+          </select>
+        </div>
+        <div class="col-md-6 adv d-none">
+          <label class="form-label">Direct Server (IP)</label>
+          <input type="text" class="form-control" name="server" placeholder="connect directly to this server">
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: CONTENT -->
+    <div class="tab-pane fade d-none" id="content" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-12">
+          <label class="form-label">Body (raw)</label>
+          <textarea class="form-control" name="body" rows="6" placeholder="Raw request body (no encoding applied)"></textarea>
+		  <div class="form-check mt-2">
+  <input class="form-check-input" type="checkbox" id="jsonToForm">
+  <label class="form-check-label" for="jsonToForm">
+    Convert JSON → application/x-www-form-urlencoded
+  </label>
+</div>
+          <div class="form-text">If Method is empty and Body is set, check_httpv2 defaults to POST.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Content-Type (for Body)</label>
+          <input type="text" class="form-control" name="content_type" placeholder="application/json">
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTH -->
+    <div class="tab-pane fade" id="auth" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Auth User</label>
+          <input type="text" class="form-control" name="auth_user">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Auth Password (plain)</label>
+          <input type="password" class="form-control" name="auth_pw_plain">
+        </div>
+
+        <div class="col-md-6 adv d-none">
+          <label class="form-label">Token Header (e.g. Authorization)</label>
+          <input type="text" class="form-control" name="token_header">
+        </div>
+        <div class="col-md-6 adv d-none">
+          <label class="form-label">Token Key (plain) e.g. "Bearer XYZ"</label>
+          <input type="text" class="form-control" name="token_key_plain">
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADERS -->
+    <div class="tab-pane fade" id="headers" role="tabpanel">
+      <div class="mb-3">
+        <label class="form-label">Additional Headers (NAME:VALUE) — one per line</label>
+        <textarea class="form-control" name="headers" rows="4" placeholder="Accept: text/html&#10;X-My-Header: 123"></textarea>
+      </div>
+
+      <div class="row g-3 adv d-none">
+        <div class="col-md-6">
+          <label class="form-label">Header Strings (KEY:VALUE) — one per line</label>
+          <textarea class="form-control" name="header_strings" rows="4" placeholder="Content-Type:text/html"></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Header Regexes (KEY:VALUE) — one per line</label>
+          <textarea class="form-control" name="header_regexes" rows="4" placeholder="Server:nginx.*"></textarea>
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="header_regexes_invert" id="headerRegexInvert">
+            <label class="form-check-label" for="headerRegexInvert">Invert header regex match</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROXY -->
+    <div class="tab-pane fade" id="proxy" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-12">
+          <label class="form-label">Proxy URL (e.g. https://my-proxy:8080 or socks5://10.1.1.1:8000)</label>
+          <input type="text" class="form-control" name="proxy_url">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Proxy User</label>
+          <input type="text" class="form-control" name="proxy_user">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Proxy Password (plain)</label>
+          <input type="password" class="form-control" name="proxy_pw_plain">
+        </div>
+        <div class="col-12 adv d-none">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="ignore_proxy_env" id="ignoreProxyEnv">
+            <label class="form-check-label" for="ignoreProxyEnv">Ignore HTTP_PROXY/HTTPS_PROXY env</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TLS / CERTS -->
+    <div class="tab-pane fade" id="tls" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">TLS Version</label>
+          <select class="form-select" name="tls_version">
+            <option value="">(auto)</option>
+            <option value="tls10">TLS 1.0</option>
+            <option value="tls11">TLS 1.1</option>
+            <option value="tls12">TLS 1.2</option>
+            <option value="tls13">TLS 1.3</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Min TLS Version</label>
+          <select class="form-select" name="min_tls_version">
+            <option value="">(none)</option>
+            <option value="tls10">TLS 1.0</option>
+            <option value="tls11">TLS 1.1</option>
+            <option value="tls12">TLS 1.2</option>
+            <option value="tls13">TLS 1.3</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Force IP Version</label>
+          <select class="form-select" name="force_ip_version">
+            <option value="">(any)</option>
+            <option value="ipv4">IPv4</option>
+            <option value="ipv6">IPv6</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" name="disable_cert" id="disableCert">
+            <label class="form-check-label" for="disableCert">Disable certificate verification (⚠️ not recommended)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKS -->
+    <div class="tab-pane fade" id="checks" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Response Time Levels (warn,crit)</label>
+          <input type="text" class="form-control" name="response_time_levels" placeholder="0.1,0.2">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status Codes (multiple allowed, comma or lines)</label>
+          <textarea class="form-control" name="status_code" rows="1" placeholder="200,301"></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Document Age Levels (warn) seconds</label>
+          <input type="text" class="form-control" name="document_age_levels" placeholder="86400">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Page Size (min,max bytes)</label>
+          <input type="text" class="form-control" name="page_size" placeholder="1,10000000">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">On Redirect</label>
+          <select class="form-select" name="onredirect">
+            <option value="">follow (default)</option>
+            <option value="ok">ok</option>
+            <option value="warning">warning</option>
+            <option value="critical">critical</option>
+            <option value="follow">follow</option>
+            <option value="sticky">sticky</option>
+            <option value="stickyport">stickyport</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Max Redirects</label>
+          <input type="number" class="form-control" name="max_redirs" min="0" placeholder="15">
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHING -->
+    <div class="tab-pane fade" id="matching" role="tabpanel">
+      <div class="row g-3">
+        <!-- Removed Body + Content-Type from here (now in Content tab) -->
+
+        <div class="col-md-6">
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" name="without_body" id="withoutBody">
+            <label class="form-check-label" for="withoutBody">Don't wait for document body</label>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Body Strings to expect (one per line)</label>
+          <textarea class="form-control" name="body_string" rows="4" placeholder="hello&#10;tutonaut"></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Body Regexes to expect (one per line)</label>
+          <textarea class="form-control" name="body_regex" rows="4" placeholder="(?i)hello.*world"></textarea>
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="body_regex_invert" id="bodyRegexInvert">
+            <label class="form-check-label" for="bodyRegexInvert">Invert body regex match</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVANCED -->
+    <div class="tab-pane fade" id="advanced" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Verbose (-v repeat)</label>
+          <select class="form-select" name="verbose_level">
+            <option value="0" selected>0</option>
+            <option value="1">-v</option>
+            <option value="2">-vv</option>
+            <option value="3">-vvv</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" name="debug_headers" id="debugHeaders">
+            <label class="form-check-label" for="debugHeaders">Debug headers</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" name="debug_content" id="debugContent">
+            <label class="form-check-label" for="debugContent">Debug content</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP -->
+    <div class="tab-pane fade" id="help" role="tabpanel">
+      <div class="p-2">
+
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h4 class="mb-1">GUI for check_httpv2</h4>
+            <div class="text-muted">A small local web GUI to run and schedule <a href="https://github.com/Checkmk/checkmk/tree/master/packages/check-http" rel="noopener" target="_blank">check_httpv2</a> checks.</div>
+			<div class="text-muted">This project is not affiliated with Checkmk GmbH, the developers of check_httpv2.</div>
+          </div>
+          <div class="text-end small">
+            <div><span class="text-muted">Copyright:</span> Mirco Lang</div>
+            <div><span class="text-muted">License:</span> <a href="COPYING">GPLv2</a></div>
+            <div><span class="text-muted">check_httpv2:</span> <a href="https://checkmk.com" rel="noopener" target="_blank">Checkmk GmbH</a></div>
+			<div><span class="text-muted">Website:</span> <a href="https://tutonaut.de" rel="noopener" target="_blank">Tutonaut.de</a></div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="card shadow-sm">
+              <div class="card-header">Project files</div>
+              <div class="card-body">
+                <ul class="mb-0">
+                  <li><code>app.py</code> — Flask backend (runs checks, scheduler, CSV/JSON logging)</li>
+                  <li><code>static/index.html</code> — UI (tabs, forms, modals)</li>
+                  <li><code>static/script.js</code> — UI logic (profiles, summary parsing, scheduler UI)</li>
+                  <li><code>static/style.css</code> — UI styles</li>
+                  <li><code>bin/check-http</code> (Linux/macOS) / <code>bin/check-http.exe</code> (Windows) — the check_httpv2 binary</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card shadow-sm">
+              <div class="card-header">Generated files</div>
+              <div class="card-body">
+                <ul class="mb-0">
+                  <li><code>profiles.json</code> — exported profiles (synced from browser LocalStorage)</li>
+                  <li><code>results.csv</code> — appended run history (for Grafana etc.)</li>
+                  <li><code>last_&lt;profile&gt;.json</code> — latest result per profile (used for live updates)</li>
+                </ul>
+                <div class="form-text mt-2">
+                  Tip: If you move the app directory, keep these files in the same folder as <code>app.py</code>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header">Quick start</div>
+              <div class="card-body">
+                <ol class="mb-0">
+                  <li>
+                    Create a virtual environment and install dependencies (Ubuntu examples).
+                    <div class="mt-2">
+                      <pre class="help-code mb-0"><code>python3 -m venv .venv
+source .venv/bin/activate
+
+# Option A: (recommended) install minimal runtime deps (Flask)
+pip install flask
+
+# Option B: install from a pinned freeze file (will be added)
+pip install -r requirements-freeze.txt
+
+# Make check_httpv2 executable
+chmod +x bin/check-http</code></pre>
+                    </div>
+                  </li>
+                  <li class="mt-3">
+                    Start the web app:
+                    <div class="mt-2">
+                      <pre class="help-code mb-0"><code>python3 app.py</code></pre>
+                    </div>
+                  </li>
+                  <li class="mt-3">
+                    Open the GUI in your browser (see the terminal output for the exact URL).
+                  </li>
+                </ol>
+
+                <hr>
+                <div class="small text-muted">
+                  Notes:
+                  <ul class="mb-0">
+                    <li>The GUI stores profiles in the browser and syncs them to <code>profiles.json</code> on the server.</li>
+                    <li>The scheduler runs one background thread per started profile.</li>
+                    <li><code>results.csv</code> is served at <code>/results.csv</code> for easy consumption.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Run -->
+    <!-- Profiles toolbar -->
+    <div class="mt-3 d-flex align-items-center gap-2 flex-wrap">
+      <button type="submit" class="btn btn-primary">Run Check</button>
+      <button type="button" id="saveProfile" class="btn btn-outline-success">Save Profile</button>
+      <button type="button" id="updateProfile" class="btn btn-outline-warning">Update Profile</button>
+      <select id="profileSelect" class="form-select w-auto">
+        <option value="">Load Profile...</option>
+      </select>
+      <button type="button" id="deleteProfile" class="btn btn-outline-danger btn-sm">Delete</button>
+      <label>Interval (seconds):
+        <input type="number" name="interval" min="10" value="60">
+      </label><br>
+    </div>
+
+    <!-- Profiles toolbar -->
+    <div class="mt-3 d-flex align-items-center gap-2 flex-wrap">
+      <button type="button"
+        id="manageProfiles"
+        class="btn btn-outline-success"
+        data-bs-toggle="modal"
+        data-bs-target="#profileModal">
+  Manage Profiles
+</button>
+      <button type="button"
+        id="manageScheduler"
+        class="btn btn-outline-info"
+        data-bs-toggle="modal"
+        data-bs-target="#schedulerModal">
+  Manage Scheduler
+</button>
+    </div>
+
+    <!-- Profile Manager Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xxl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Profile Manager</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Saved Profiles</h6>
+              <span id="profileCount" class="text-muted small"></span>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 border-end">
+                <table class="table table-sm align-middle table-hover">
+                  <thead>
+                    <tr><th>Name</th><th>URL</th><th class="text-nowrap">Retention</th><th></th></tr>
+                  </thead>
+                  <tbody id="profilesTableBody"></tbody>
+                </table>
+              </div>
+
+              <div class="col-md-6 ps-3">
+                <h6>Profile Preview</h6>
+                <div id="profilePreview" class="border rounded p-2 bg-light small" style="min-height:250px;">
+                  <em class="text-muted">Select a profile to view details.</em>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scheduler Manager Modal -->
+    <div class="modal fade" id="schedulerModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Scheduler Manager</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr><th>Profile</th><th>Interval (s)</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="schedulerTableBody"></tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="mt-4 p-3 bg-white rounded shadow-sm">
+      <div id="status" class="status">Waiting for check...</div>
+
+      <h5 class="mt-3">Summary</h5>
+      <table id="summaryTable" class="table table-sm summary">
+        <thead>
+          <tr><th>Metric</th><th>Value</th><th>Expected</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h5 class="mt-3">Raw Output</h5>
+      <pre id="output" class="output"></pre>
+    </div>
+
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/script.js"></script>
+
+<!-- NEW: toggle Content tab based on selected method -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const methodEl = document.getElementById("methodSelect");
+    const tabLi = document.getElementById("content-tab-li");
+    const pane = document.getElementById("content");
+    const contentTabBtn = document.getElementById("content-tab");
+    const basicTabBtn = document.getElementById("basic-tab");
+
+    if (!methodEl || !tabLi || !pane || !contentTabBtn || !basicTabBtn) return;
+
+    const wantsBody = (m) => {
+      const mm = String(m || "").trim().toUpperCase();
+      // You said "Push or Put" -> interpreted as POST or PUT
+      // Also includes PATCH as same use-case. Remove PATCH if you want.
+      return mm === "POST" || mm === "PUT" || mm === "PATCH";
+    };
+
+    const hideContentTab = () => {
+      // if content tab is active, switch back to Basic
+      if (contentTabBtn.classList.contains("active")) {
+        bootstrap.Tab.getOrCreateInstance(basicTabBtn).show();
+      }
+      tabLi.classList.add("d-none");
+      pane.classList.add("d-none");
+    };
+
+    const showContentTab = () => {
+      tabLi.classList.remove("d-none");
+      pane.classList.remove("d-none");
+    };
+
+    const apply = () => {
+      if (wantsBody(methodEl.value)) showContentTab();
+      else hideContentTab();
+    };
+
+    methodEl.addEventListener("change", apply);
+    apply(); // initial
+  });
+</script>
+
+</body>
+</html>
