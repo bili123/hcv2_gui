@@ -31,7 +31,7 @@ And here's a video tour, german only: https://youtu.be/GXz_q6E88hI‎
 ## Installation
 
 General:
-- Install Python
+- Install Python (and seperately venv if prompted)
 - Clone repo or download release
 - Enter directory
 
@@ -39,7 +39,7 @@ Linux:
 - python3 -m venv .venv
 - source .venv/bin/activate
 - pip install flask
-- python app.py
+- python3 app.py
 
 Windows:
 - python -m venv .venv
